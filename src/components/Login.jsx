@@ -2,50 +2,54 @@ import React, { useState } from 'react'
 import axios from 'axios';
 import {useNavigation, Link, useNavigate} from 'react-router-dom';
 const Login = () => {
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const history = useNavigate();
-
-  async function submit(e){
-    e.preventDefault();
-    try{
-      await axios.post("mongodb://localhost:27017/authentication.auth",{
-        email, password
-      })
-      .then(res=>{
-        if(res.data="already exist"){
-            history('/home', {state:{id:email}})
-        }
-        else if(res.data="not exist"){
-          alert("User not sign up")
-        }
-      })
-      .catch((e)=>{
-        alert("wrong details");
-        console.log(e);
-      })
-
-       
+  const handleLoginSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await axios.get('/login', {
+        email: loginEmail,
+        password: loginPassword,
+      });
+      if (response.data === 'Login successful') {
+        // Handle successful login (e.g., store token and redirect)
+        console.log('Login successful!');
+      } else {
+        setErrorMessage(response.data);
+        console.log("Invalid Credentials")
+      }
+    } catch (error) {
+      console.error('Error submitting login:', error);
+      setErrorMessage('An error occurred. Please try again later.');
     }
-    catch(e){
-      console.log("error")
-    }
-  }
+  };
+
   return (
     <div className='login'>
-        <h1>Login</h1>
-        <form action="POST">
-            <input type="email" onChange={(e)=>{setEmail(e.target.value)}} placeholder='Enter your Email' />
-            <input type="password" onChange={(e)=>{setPassword(e.target.value)}} placeholder='Enter your Password' />
-
-            <input type="submit" onClick={submit}/>
-            <br />
-            <p>or</p>
-            <br />
-            <Link  to="/signup">Sign up</Link>
-        </form>
+       <h1>Sign In</h1>
+      <form onSubmit={handleLoginSubmit}>
+        <label htmlFor="login-email">Email:</label>
+        <input
+          type="email"
+          id="login-email"
+          value={loginEmail}
+          onChange={(e) => setLoginEmail(e.target.value)}
+        />
+        <br />
+        <label htmlFor="login-password">Password:</label>
+        <input
+          type="password"
+          id="login-password"
+          value={loginPassword}
+          onChange={(e) => setLoginPassword(e.target.value)}
+        />
+        <br />
+        <button type="submit">Sign In</button>
+        <br />
+        <p>new user <span><Link to='signup'>Sign Up</Link></span></p>
+      </form>
     </div>
   )
 }

@@ -1,42 +1,55 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useHistory, Link } from 'react-router-dom'; // Import useHistory hook directly
+import { Link } from 'react-router-dom';
 
 const Signup = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const history = useHistory(); // Use useHistory hook to access the history object
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  async function submit(e) {
-    e.preventDefault();
+  const handleSignupSubmit = async (event) => {
+    event.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8000/signup", {
-        email,
-        password
+      const response = await axios.post('/signup', {
+        email: signupEmail,
+        password: signupPassword,
       });
-
-      if (res.data === "already exist") {
-        alert("User already exists");
-      } else if (res.data === "not exist") {
-        history.push('/home', { state: { id: email } }); // Use push method of history object to navigate
+      if (response.data === 'User created successfully') {
+        // Handle successful signup (e.g., redirect to login page)
+        console.log('Signup successful!');
+      } else {
+        setErrorMessage(response.data);
       }
     } catch (error) {
-      alert("Wrong details");
-      console.log(error);
+      console.error('Error submitting signup:', error);
+      setErrorMessage('An error occurred. Please try again later.');
     }
-  }
+  };
+
 
   return (
-    <div className='signup'>
-      <h1>Sign up</h1>
-      <form onSubmit={submit}>
-        <input type="email" onChange={(e) => setEmail(e.target.value)} placeholder='Enter your Email' />
-        <input type="password" onChange={(e) => setPassword(e.target.value)} placeholder='Enter your Password' />
-        <input type="submit" value="Submit" />
+    <div className="App">
+      <h1>Sign Up</h1>
+      <form onSubmit={handleSignupSubmit}>
+        <label htmlFor="signup-email">Email:</label>
+        <input
+          type="email"
+          id="signup-email"
+          value={signupEmail}
+          onChange={(e) => setSignupEmail(e.target.value)}
+        />
         <br />
-        <p>or</p>
+        <label htmlFor="signup-password">Password:</label>
+        <input
+          type="password"
+          id="signup-password"
+          value={signupPassword}
+          onChange={(e) => setSignupPassword(e.target.value)}
+        />
         <br />
-        <Link to="/signup">Sign up</Link>
+        <button type="submit">Sign Up</button>
+        <br />
+        <p>or <span><Link to='login'>SignIn</Link></span></p>
       </form>
     </div>
   );
